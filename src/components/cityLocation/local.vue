@@ -1,0 +1,211 @@
+<template>
+  <div class="localWrap">
+    <search :place="'请输入城市名'" :backW="true">
+      <i class="back" @click="goBack"></i>
+    </search>
+    <div class="currentCity">
+      <h4>当前定位城市</h4>
+    </div>
+    <div class="locationCity">
+      <span>城市变量</span>
+      <button>重新定位</button>
+    </div>
+    <div class="city">
+      <div class="cityListWrap" ref="cityListWrap">
+        <ul>
+          <li v-for="(item,index) in ChinaCity" class="city-list" ref="cityList" :key="index">
+            <h1 class="title">{{item.names}}</h1>
+            <ul>
+              <li @click="selectCity(cityName.name,$event,cityName.adminCode)" v-for="(cityName,index) in item.sysCityList" :key="index" >
+                 <span>{{cityName.name}}</span>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <div class="letterWrap" ref="letterWrap">
+        <ul>
+          <li v-for="(item,index) in ChinaCity" :class="{'current':currentIndex == index}"
+              @click="selectLetter(item.names,$event,index)" ref="letterList">
+            <span>{{item.names}}</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</template>
+<script type="text/ecmascript-6">
+  import search from '../common/search.vue'
+  import BScroll from 'better-scroll'
+  import {cityList} from '../../api/cityApi'
+  export default {
+    data(){
+      return {
+        ChinaCity:[{}],
+        listHeight:[],
+        scrollY:0
+      }
+    },
+    computed:{
+      currentIndex() {
+        for (let i = 0; i < this.listHeight.length; i++) {
+          let height1 = this.listHeight[i];
+          let height2 = this.listHeight[i + 1];
+          if (!height2 || (this.scrollY >= height1 && this.scrollY < height2)) {
+            this._followScroll(i);
+            return i;
+          }
+        }
+        return 0;
+      }
+    },
+    created(){
+      cityList().then(res =>{
+        console.log(res);
+        if (res.data.retcode == 1000){
+          this.ChinaCity = res.data.data;
+          this.$nextTick(() =>{
+            this._initScroll();
+            this._calculateHeight();
+          })
+        }else {
+          alert(res.data.retmsg)
+        }
+
+      })
+    },
+    methods:{
+      goBack() {
+        window.history.length > 1?  history.go(-1) : this.$router.push('/')
+      },
+      _initScroll(){
+        this.cityScroll = new BScroll(this.$refs.cityListWrap, {
+          click: true,
+          probeType: 3
+        });
+        this.cityScroll.on('scroll', (pos) => {
+          // 判断滑动方向，避免下拉时分类高亮错误（如第一分类商品数量为1时，下拉使得第二分类高亮）
+          if (pos.y <= 0) {
+            this.scrollY = Math.abs(Math.round(pos.y));
+          }
+        });
+
+        this.letterScroll = new BScroll(this.$refs.letterWrap, {
+          click: true
+        });
+      },
+      _calculateHeight(){
+        let cityList = this.$refs.cityList;
+        let height = 0;
+        this.listHeight.push(height);
+        for (let i = 0; i < cityList.length; i++) {
+          let item = cityList[i];
+          height += item.clientHeight;
+          this.listHeight.push(height);
+        }
+      },
+      selectCity(name,e,code){
+        alert(code)
+      },
+      _followScroll(index){
+        let letterList = this.$refs.letterList;
+        let el = letterList[index];
+        this.letterScroll.scrollToElement(el, 300, 0, -100);
+      },
+      selectLetter(letter,e,index){
+        if (!event._constructed) {
+          return;
+        }
+        let cityList = this.$refs.cityList;
+        let el = cityList[index];
+        this.cityScroll.scrollToElement(el, 300);
+      }
+    },
+    components:{search}
+  }
+</script>
+<style lang="stylus" scoped>
+  @import "../../common/stylus/variable.styl"
+  @import "../../common/stylus/mixin.styl"
+  .currentCity
+    height 74px
+    padding-left 46px
+    font-size $font-size-24
+    color rgb(102,102,102)
+    line-height @height
+  .locationCity
+    display flex
+    height 92px
+    background-color #ffffff
+    align-items center
+    justify-content space-between
+    font-size $font-size-30
+    color rgb(102,102,102)
+    padding 0 40px 0 77px
+    button
+      height 100%
+      font-size 30px
+      background-color transparent
+      border none
+      color $color-blue
+
+
+  .city
+    display flex
+    position absolute
+    top 254px
+    bottom 0
+    left 0
+    right 0
+    overflow hidden
+    background-color #ffffff
+    .cityListWrap
+      flex  1
+      .city-list
+        background-color #f1f0f0
+        .title
+          padding-left 46px
+          font-size 24px
+          color rgb(102,102,102)
+          height 52px
+          line-height 52px
+          background-color #f1f0f0
+        ul
+          background-color #ffffff
+          padding-left 68px
+          li
+            font-size $font-size-30
+            line-height 88px
+            border-bottom 1px solid $color-bottom
+            height 88px
+
+
+
+    .letterWrap
+      flex 0 0 40px
+      width 40px
+      text-align center
+      margin-top 52px
+      color $color-blue
+      font-size $font-size-24
+      li
+        width @width
+        height 40px
+        line-height 40px
+        background-color #ffffff
+
+      .current
+        font-size $font-size-36
+       // color red
+
+
+
+  .back
+    display block
+    width 38px
+    height 35px
+    margin 0 auto
+    $bg-size(100%,100%)
+    $bg-image('./ic-close-white')
+</style>
