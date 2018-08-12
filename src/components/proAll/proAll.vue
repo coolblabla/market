@@ -1,6 +1,6 @@
 <template>
   <div class="proAll">
-    <search :backW="true">
+    <search :backW="true" :showSearch="showSearch">
       <i class="back" @click="goBack"></i>
     </search>
     <!--tab-->
@@ -32,6 +32,7 @@
   export default {
     data(){
       return {
+        showSearch:true, //是否显示 输入框
         fade:'fadeIn',
         recommends:[],
         currentIndex:0,
@@ -43,6 +44,8 @@
       }
     },
     created(){
+      console.log( this.$router.typeId)
+      this.$router.typeId == 1? this.showSearch = false : this.showSearch = true;
       this.initProductTypes();
     },
     methods:{

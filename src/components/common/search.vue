@@ -3,9 +3,9 @@
     <div class="flag" :class="{'backWidth':backW}">
       <slot></slot>
     </div>
-    <div class="search">
+    <div class="search" v-if="showSearch">
       <i></i>
-      <input :placeholder="place"/>
+      <input :placeholder="place" />
     </div>
   </div>
 </template>
@@ -21,6 +21,11 @@
       place:{
         default(){
           return '搜索'
+        }
+      },
+      showSearch:{
+        default(){
+          return true
         }
       }
     },
@@ -38,6 +43,8 @@
   display flex
   align-items center
   padding 14px 40px 14px 0
+  height 88px
+  box-sizing border-box
   background-color $color-blue
   .flag
     flex  0 0 180px

@@ -11,6 +11,10 @@
     </search>
     <div class="productWrap" ref="productWrap">
       <div>
+        <div class="top-tip">
+          <span class="refresh-hook">{{topTip}}</span>
+        </div>
+        <div class="refreshAlert" v-show="refreshAlert"><p>刷新成功!</p></div>
         <div class="bannerWrap">
           <div class="banner">
             <scroll ref="scroll" class="recommend-content">
@@ -49,6 +53,9 @@
             <hot :arr="recommends"></hot>
           </div>
         </div>
+        <div class="bottom-tip" v-show="bottomTipJudge">
+          <span class="loading-hook">{{bottomTip}}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -60,12 +67,20 @@
   import search from '../common/search.vue'
   import listTitle from '../common/listTitle.vue'
   import hot from '../common/hot.vue'
-  import {banner} from '../../api/api'
- // import {getCity} from '../../common/js/fun'
+  import {banner,hotProduct} from '../../api/api'
+  import {initScroll} from '../../common/js/fun'
   export default {
     data(){
       return {
+        /*刷新和加载跟多一些数据*/
+        topTip:'下拉刷新',
+        bottomTip:'查看更多',
+        bottomTipJudge:false,
+        refreshAlert:false,
+        page :1,
+
         bannerList:[{}],
+        recommends:[],
         cityName:'台州市',
         routerparams:{
           tabId:0,
@@ -73,13 +88,14 @@
       }
     },
     created(){
-      this._getRecommend();
       this._initBanner();
       this.$router.typeId = 2; //区分 同城 和 线上
-      this.$router.isLine = 2;//区分 同城 和 线上
+      this.$nextTick(() =>{
+        initScroll(this,hotProduct,this.$refs.productWrap,{page:this.page,isLine:2});
+      });
+    //  this.$router.isLine = 2;//区分 同城 和 线上
     },
     mounted(){
-      this._initProdutScroll();
       this.$root.$on('address',(res) =>{
         this.cityName = res;
       });
@@ -95,46 +111,6 @@
             alert(res.data.retmsg)
           }
         });
-      },
-      _initProdutScroll(){
-        if(!this.proScroll){
-          this.proScroll = new BScroll(this.$refs.productWrap, {
-            click: true,
-          });
-        }else {
-          this.proScroll.refresh()
-        }
-      },
-      _getRecommend() {
-        this.recommends =  [
-          {
-            "linkUrl": "https://c.y.qq.com/node/m/client/music_headline/index.html?_hidehd=1&_button=2&zid=700567",
-            "picUrl": "http://y.gtimg.cn/music/photo_new/T003R720x288M000003kGTF00E6oXe.jpg",
-            "id": 15055,
-            "name":"老张有钱,",
-            "min":"1000",
-            "max":"20000",
-            list:['身份证','一次还清','新上线1']
-          },
-          {
-            "linkUrl": "https://y.qq.com/msa/319/5_5136.html",
-            "picUrl": "http://y.gtimg.cn/music/photo_new/T003R720x288M0000008Xxwd1417y8.jpg",
-            "id": 15068,
-            "name":"我曾经很有钱,只是用完了",
-            "min":"1000",
-            "max":"8000",
-            list:['身份证','一次还清','新上线2']
-          },
-          {
-            "linkUrl": "https://y.qq.com/msa/324/0_5137.html",
-            "picUrl": "http://y.gtimg.cn/music/photo_new/T003R720x288M000002ab5of4Z6qH0.jpg",
-            "id": 14616,
-            "name":"喝喝",
-            "min":"1000",
-            "max":"5000",
-            list:['身份证','一次还清','新上线3']
-          }
-        ]
       },
     },
 //    beforeRouteUpdate(to,from,next){
@@ -157,6 +133,7 @@
 <style scoped lang="stylus">
   @import "../../common/stylus/variable.styl"
   @import "../../common/stylus/mixin.styl"
+  @import "../../common/stylus/proList.styl"
   .continue
     .bannerWrap
       background-color #ffffff
@@ -208,4 +185,12 @@
       span
         display inline-block
         vertical-align middle
+  .top-tip
+    position absolute
+    top -60px
+    text-align center
+    left 50%
+    transform translate(-50%)
+  .refreshAlert
+    top 0
 </style>

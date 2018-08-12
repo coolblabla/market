@@ -1,6 +1,10 @@
 <template>
   <div class="continue" ref="continue">
     <div>
+      <div class="top-tip">
+        <span class="refresh-hook">{{topTip}}</span>
+      </div>
+      <div class="refreshAlert" v-show="refreshAlert"><p>刷新成功!</p></div>
       <div class="banner">
         <scroll ref="scroll" class="recommend-content">
           <div>
@@ -52,8 +56,11 @@
           <list-title :title="'热门推荐'"></list-title>
         </div>
         <div class="list">
-         <hot :arr="list"></hot>
+         <hot :arr="recommends"></hot>
         </div>
+      </div>
+      <div class="bottom-tip" v-show="bottomTipJudge">
+        <span class="loading-hook">{{bottomTip}}</span>
       </div>
     </div>
   </div>
@@ -66,18 +73,26 @@
   import listTitle from '../common/listTitle.vue'
   import hot from '../common/hot.vue'
   import {banner,hotProduct,selectProduct} from '../../api/api'
-  import {_initScroll} from '../../common/js/fun'
+  import {_initScroll,initScroll} from '../../common/js/fun'
 export default {
   name: 'home',
   data () {
     return {
+      /*刷新和加载跟多一些数据*/
+      topTip:'下拉刷新',
+      bottomTip:'查看更多',
+      bottomTipJudge:false,
+      refreshAlert:false,
+      page :1,
+
       routerparams:{
         tabId:0,
       },
-      page :1,
+
       goodProList:[],
       banner:[{}],
-      list:[],
+      recommends:[],  //热门 产品
+    //  list:[],
       tab:[
         {id:1, route:'/type', params:{},name:'借款新口子'},
         {id:2, route:'/type', params:{state:1},name:'身份大额度'},
@@ -94,9 +109,10 @@ export default {
   },
   created(){
    this._initBanner();
-   this._getRecommend();
  //  this._initSelectProduct();   //产品精选
-   _initScroll(this,hotProduct);
+    this.$nextTick(() =>{
+      initScroll(this,hotProduct,this.$refs.continue,{page:this.page,isLine:1});
+    });
   this.$router.typeId = 1;//区分 同城 和 线上
   this.$router.isLine = 1;//区分 同城 和 线上
   },
@@ -129,43 +145,7 @@ export default {
           }
         }
       })
-    },
-    _getRecommend() {
-      this.recommends =  [
-        {
-          "linkUrl": "https://c.y.qq.com/node/m/client/music_headline/index.html?_hidehd=1&_button=2&zid=700567",
-          "picUrl": "http://y.gtimg.cn/music/photo_new/T003R720x288M000003kGTF00E6oXe.jpg",
-          "id": 15055,
-          "name":"老张有钱,",
-          "min":"1000",
-          "max":"20000",
-          list:['身份证','一次还清','新上线1']
-        },
-        {
-          "linkUrl": "https://y.qq.com/msa/319/5_5136.html",
-          "picUrl": "http://y.gtimg.cn/music/photo_new/T003R720x288M0000008Xxwd1417y8.jpg",
-          "id": 15068,
-          "name":"我曾经很有钱,只是用完了",
-          "min":"1000",
-          "max":"8000",
-          list:['身份证','一次还清','新上线2']
-        },
-        {
-          "linkUrl": "https://y.qq.com/msa/324/0_5137.html",
-          "picUrl": "http://y.gtimg.cn/music/photo_new/T003R720x288M000002ab5of4Z6qH0.jpg",
-          "id": 14616,
-          "name":"喝喝",
-          "min":"1000",
-          "max":"5000",
-          list:['身份证','一次还清','新上线3']
-        }
-      ];
-      this.messageList = [
-        {id:1,msg:'1111111每邀请一位小伙伴,返佣金0.1%,小伙伴加油吧！'},
-        {id:2,msg:'22222222来我们这里借钱吧来我们这里借钱吧！'},
-        {id:3,msg:'3333333如果俞天阳会飞！'},
-      ]
-    },
+    }
   },
   beforeRouteEnter(to,from,next){
     next(vm =>{
@@ -182,6 +162,7 @@ export default {
 
 <style scoped lang="stylus">
  @import "../../common/stylus/mixin.styl"
+ @import "../../common/stylus/proList.styl"
 .continue
   position absolute
   left 0
@@ -288,4 +269,12 @@ export default {
       padding-left 40px
     .list
       padding-left 40px
+  .top-tip
+    position absolute
+    top -60px
+    text-align center
+    left 50%
+    transform translate(-50%)
+  .refreshAlert
+    top 0
 </style>

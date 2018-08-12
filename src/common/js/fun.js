@@ -80,6 +80,7 @@ export function _initScroll(vm,req) {
 
 export function responseScroll(vm,req,par){
   return req(par).then((res) =>{
+    console.log(res);
     if (res.data.retcode == baseConfig.responseCode){
       if (res.data.data.list.length != 0){
         vm.recommends = vm.recommends.concat(res.data.data.list);
