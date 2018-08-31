@@ -14,6 +14,7 @@
         </li>
       </ul>
     </div>
+   <!-- <div style="position: absolute ;z-index: 99999;">{{demo}}</div>-->
     <div @touchend="touchEnd($event)" @touchstart="touchStart($event)">
       <transition :name="fade">
         <keep-alive>
@@ -24,29 +25,37 @@
   </div>
 </template>
 <script type="text/ecmascript-6">
+  import "../../common/stylus/slide.css";
   import search from '../common/search.vue'
   import BScroll from 'better-scroll'
   import loanList from '../common/loanList.vue'
   import {initScroll} from '../../common/js/fun'
   import {ProductTypes,ProductAllCity} from '../../api/cityApi'
+  import {bus} from '../../common/js/bus'
   export default {
     data(){
       return {
         showSearch:true, //是否显示 输入框
-        fade:'fadeIn',
+        fade:'slideRight',
         recommends:[],
         currentIndex:0,
         touchVal:{},
         page:1,
         menu :[{typeName:'全部'}],   //标签
         recommends:null,
-        path:this.$router.currentRoute.path
+        path:this.$router.currentRoute.path,
+        demo:''
       }
     },
     created(){
       console.log( this.$router.typeId)
       this.$router.typeId == 1? this.showSearch = false : this.showSearch = true;
       this.initProductTypes();
+    },
+    mounted(){
+      bus.$on('refreshcity',() =>{
+         this.$destroy();
+      })
     },
     methods:{
       initProductTypes(){
@@ -92,10 +101,6 @@
             currentIndex --;
             this._followScroll(currentIndex);
             this.$router.push({name: 'tab'+currentIndex, params: {tabId: currentIndex,id:this.menu[currentIndex].id}})
-//            this.proScroll.on('scrollEnd', () => {
-//              console.log('结束了 的范德萨发')
-//           //  this.$router.push({name: 'tab', params: {tabId: currentIndex}})
-//            });
           }else{
             return;
           }
@@ -105,9 +110,6 @@
             if (currentIndex < this.menu.length) {
               currentIndex ++;
               this._followScroll(currentIndex);
-//              this.proScroll.on('scrollEnd', () => {
-//                this.$router.push({name: 'tab', params: {tabId: currentIndex}})
-//              });
              this.$router.push({name: 'tab'+currentIndex, params: {tabId: currentIndex,id:this.menu[currentIndex].id}})
             }else{
               return;
@@ -115,14 +117,11 @@
           }
       },
       goBack() {
-        console.log(this.$route.params)
-        console.log(this.$router)
         if (this.$router.typeId == 1){
           this.$router.push({ name: 'home'})
         }else if(this.$router.typeId == 2){
           this.$router.push({ name: 'city'})
         }
-
       },
       _initMenuScroll() {
         let width = 0;
@@ -150,9 +149,9 @@
     watch:{
       '$route'(to,from){
          if (to.params.tabId > from.params.tabId){
-          this.fade = 'fadeTo'
+          this.fade = 'slideRight'
          }else{
-           this.fade = 'fadeIn'
+           this.fade = 'slideLeft'
          }
       }
     },
@@ -167,63 +166,65 @@
 <style lang="stylus" scoped>
   @import "../../common/stylus/mixin.styl"
   @import "../../common/stylus/variable.styl"
+  .proAll
+    overflow hidden
   /*菜单*/
-  .menuWrap
-    position absolute
-    top 88px
-    left 0
-    z-index 99
-    width 100%
-    padding 0 58px 0 47px
-    box-sizing border-box
-    background-color #ffffff
-    height 88px
-    overflow hidden
-    color $color-h
+    .menuWrap
+      position absolute
+      top 88px
+      left 0
+      z-index 99
+      width 100%
+      padding 0 58px 0 47px
+      box-sizing border-box
+      background-color #ffffff
+      height 88px
+      overflow hidden
+      color $color-h
 
-    ul
-      display flex
-      height 100%
-      li
-        flex 0 0 120px
-        width 120px
-        height 88px
-        box-sizing border-box
-        line-height 88px
-        margin auto
-        padding 0 10px
-        text-align center
-        font-size 29px
-        .router-link-active
+      ul
+        display flex
+        height 100%
+        li
+          flex 0 0 120px
+          width 120px
+          height 88px
           box-sizing border-box
-          border-bottom 6px solid $color-blue
-        a
-          display block
-          width 100%
-          height 100%
-  .proWrap
-    position absolute
-    z-index 0
-    top 118px
-    bottom 0
-    left 0
-    right 0
-    overflow hidden
-  .back
-    display block
-    width 38px
-    height 35px
-    margin 0 auto
-    $bg-size(100%,100%)
-    $bg-image('./ic-back-white')
+          line-height 88px
+          margin auto
+          padding 0 10px
+          text-align center
+          font-size 29px
+          .router-link-active
+            box-sizing border-box
+            border-bottom 6px solid $color-blue
+          a
+            display block
+            width 100%
+            height 100%
+    .proWrap
+      position absolute
+      z-index 0
+      top 118px
+      bottom 0
+      left 0
+      right 0
+      overflow hidden
+    .back
+      display block
+      width 38px
+      height 35px
+      margin 0 auto
+      $bg-size(100%,100%)
+      $bg-image('./ic-back-white')
 
-  .fadeIn-enter
-    transform: translateX(100%)
-    opacity: 0
-  .fadeIn-enter-active, .fadeTo-enter-active
-    transition: all 1s ease;
-  .fadeTo-enter
-    transform: translateX(-100%);
+    .fadeIn-enter
+      transform: translateX(100%)
+      opacity: 0
+    .fadeIn-enter-active, .fadeTo-enter-active
+      transition: all 1s ease;
+    .fadeTo-enter
+      transform: translateX(-100%);
 
 
 </style>

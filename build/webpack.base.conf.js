@@ -12,6 +12,9 @@ function resolve (dir) {
 
 module.exports = {
   context: path.resolve(__dirname, '../'),
+  externals: {
+    'AMap': 'AMap'
+  },
   entry: {
     app: './src/main.js',
     city:'./src/cityMain.js',
@@ -79,5 +82,6 @@ module.exports = {
     net: 'empty',
     tls: 'empty',
     child_process: 'empty'
-  }
+  },
+
 }

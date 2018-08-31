@@ -6,6 +6,9 @@ import proApply from '@/components/proApply/proApply'
 import allList from '@/components/common/allList'
 import loanList from '@/components/common/loanList'
 import local from '@/components/cityLocation/local'
+import fastApply from  '@/components/common/fastApply'  //点击申请的时候
+import proSearch from '@/components/proSearch/proSearch'
+
 
 import all from '@/components/proAll/proAll'
 import tabAll from '@/components/tab/tab_all'
@@ -30,12 +33,17 @@ export default new Router({
       path: '/local',
       name: 'local',
       component: local
-    }
-    ,
+    }, {
+      path :'/fastApply',
+      name:'fastApply',
+      component:fastApply,
+      meta: { requiresAuth: true }
+    },
     {
       path: '/all',
       name: 'all',
       component: all,
+      //meta: { requiresAuth: true },
       children:[
         {path:'tab/:tabId',name:'tab0',component:tabAll}, //全部
         {path:'tab/:tabId',name:'tab1',component:tabPhone},  //手机
@@ -53,7 +61,12 @@ export default new Router({
     ,{
       path: '/apply',
       name: 'applyPage',
-      component: proApply
+      component: proApply,
+    },
+    {
+      path:'/search',
+      name:'proSearch',
+      component:proSearch
     }
   ]
 })

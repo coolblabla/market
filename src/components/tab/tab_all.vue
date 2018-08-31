@@ -15,8 +15,9 @@
 <script type="text/ecmascript-6">
   import loanList from '../common/loanList.vue'
   import {ProductAllCity} from '../../api/cityApi'
-  import {initScroll} from '../../common/js/fun'
+  import {initScroll,responseScroll} from '../../common/js/fun'
   import {proList} from  '../../common/js/fun'
+  import {bus} from '../../common/js/bus'
   export default {
     data(){
       return {

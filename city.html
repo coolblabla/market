@@ -5,7 +5,24 @@
   <title>同城贷</title>
 </head>
 <body>
+<!--<script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.9&key=6ab950d44fdd90e21e94e17ad87cbdaf"></script>-->
 <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=8mHttx4uZDZb3XRSevDk4YeAWNAeE0VU"></script>
+<!--<script type="text/javascript" src="https://cache.amap.com/lbs/static/addToolbar.js"></script>-->
+<script>
+  var iosParams = null;
+  var AndroidParams = false;
+  function iosCallback(data) {
+    if(typeof(Storage)!=="undefined"){
+      localStorage.ioscon=data;
+    } else{
+      alert("对不起您的浏览器不支持 web 存储");
+    }
+    iosParams = data;
+  }
+  function AndroidCallback() {
+    return AndroidParams;
+  }
+</script>
 <div id="app"></div>
 </body>
 </html>

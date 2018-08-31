@@ -3,48 +3,56 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
- //import Vuerify from 'vuerify'
 import 'lib-flexible'
 import fastclick from 'fastclick'
 import './common/stylus/index.styl'
-//import {auth,userInfo} from "./api/api"
-//import {bus} from "./common/js/bus"
-//import VueClipboard  from 'vue-clipboard2'
+import 'mint-ui/lib/style.css'
+import {isIos,isAndroid} from "./common/js/verify"
+import {Swipe, SwipeItem ,MessageBox,TabContainer, TabContainerItem,InfiniteScroll,Loadmore,Indicator,Popup   } from 'mint-ui'
 fastclick.attach(document.body);
-//Vue.use(Vuerify);
-//Vue.use(VueClipboard);
 Vue.config.productionTip = false;
 
-
+Vue.component(Swipe.name, Swipe);
+Vue.component(SwipeItem.name, SwipeItem);
+Vue.component(TabContainer.name, TabContainer);
+Vue.component(TabContainerItem.name, TabContainerItem);
+Vue.component(Loadmore.name, Loadmore);
+Vue.use(InfiniteScroll);
+Vue.component(Popup.name, Popup);
 // router.beforeEach((to,from,next) =>{
 //   if (to.matched.some(record => record.meta.requiresAuth)) {  //meta 路由元信息判断
-//     if (bus.status == 0){  //刷新页面
-//       auth().then((res)=>{  //请求 是否登录
-//         if (res.data.retcode == 1000){
-//           console.log('多少人')
-//           if(res.data.data.isLogin == 0){  //如果没登录
-//             next({
-//               path:'/my/register',
-//             })
-//           }else{  //如果登陆了
-//             bus.status = 1;
-//             next();
-//           }
-//         }else {
-//           next({
-//             path:'/my/register',
-//           });
+//     if (isIos()){
+//    //   next();    //到时候要取消掉
+//      if( typeof(localStorage.ioscon) == 'string'){
+//        var iosParams = JSON.parse(localStorage.ioscon);
+//         localStorage.$rem = iosParams.userid;    //获取用户id
+//         if (iosParams.islogin == 1){
+//            next();
+//         }else if(iosParams.islogin == 0){
+//           window.webkit.messageHandlers.getParam.postMessage('');
+//           // window.location.href = 'http://www.taobao.com'
 //         }
-//       });
+//      }else {
+//        alert('格式错误')
+//      }
+//     }
 //
-//     }else {  //如果登陆了
-//       console.log('现在status为1')
-//       next()
+//     if (isAndroid()){
+//      // next();    //到时候要取消掉
+//      var  result =  window.android.getParam();
+//       localStorage.result = result;
+//       result = result.split(",");
+//       localStorage.$rem = result[1];   //获取用户id
+//       if (result[0] == 'true'){
+//          next();
+//       }else if (result[0] == 'false'){  //没有登录
+//      //   window.android.toLogin();
+//       }
 //     }
 //
 //
 //   } else {
-//     next() // 确保一定要调用 next()
+//     next()
 //   }
 // });
 

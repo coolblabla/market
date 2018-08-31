@@ -1,24 +1,14 @@
 <template>
-  <div class="continue" ref="continue">
+  <scroll class="continue" ref="scroll" @touchtop="touchtop" @touchbottom="touchbottom">
     <div>
-      <div class="top-tip">
-        <span class="refresh-hook">{{topTip}}</span>
-      </div>
-      <div class="refreshAlert" v-show="refreshAlert"><p>刷新成功!</p></div>
-      <div class="banner">
-        <scroll ref="scroll" class="recommend-content">
-          <div>
-            <div class="slider-wrapper">
-              <slider ref="isSliderX">
-                <div v-for="(item, index) in banner" :key="index">
-                  <a :href="item.vUrl" >
-                    <img :src="item.vImgUrl" width="100%" height="100%">
-                  </a>
-                </div>
-              </slider>
-            </div>
-          </div>
-        </scroll>
+      <div class="bannerSlider">
+        <mt-swipe :auto="4000">
+          <mt-swipe-item v-for="(item, key) in banner" :key="key">
+            <a :href="item.vUrl" >
+              <img :src="item.vImgUrl" alt="" width="100%" height="100%"/>
+            </a>
+          </mt-swipe-item>
+        </mt-swipe>
       </div>
       <div class="tab">
         <ul>
@@ -26,31 +16,27 @@
         </ul>
       </div>
       <!--贷款精品-->
-      <div class="proGood">
-        <div class="head">
+      <proGood>
+        <div class="head" slot="head">
           <list-title :title="'借贷精选'" :more="true" :skip="'tab0'" :routerparams = routerparams></list-title>
         </div>
-        <div class="proGood_list">
-         <!-- <scroll ref="good" class="recommend-content">-->
-            <div>
-              <div class="slider-wrapper">
-                <slide ref="isSliderGoodX">
-                  <div class="goodSlider" v-for="(item, index) in goodProList" :key="index">
-                    <ul>
-                      <li v-for="(child,n) in item" :key="n">
-                        <router-link :to="{name:'applyPage'}">
-                          <img :src="child.proIcon" />
-                          <p>{{child.proName}}</p>
-                        </router-link>
-                      </li>
-                    </ul>
-                  </div>
-                </slide>
-              </div>
-            </div>
-         <!-- </scroll>-->
+        <div class="proGood_list" slot="main">
+          <div class="proGoodContainer">
+            <mt-swipe :auto="4000">
+              <mt-swipe-item class="goodSlider" v-for="(item, key) in goodProList" :key="key">
+                <ul>
+                  <li v-for="(slider,key2) in item" :key="key2">
+                    <router-link :to="{name:'applyPage',params:{name:slider.proName,id:slider.proId}}">
+                      <img :src="slider.proIcon" />
+                      <p>{{slider.proName}}</p>
+                    </router-link>
+                  </li>
+                </ul>
+              </mt-swipe-item>
+            </mt-swipe>
+          </div>
         </div>
-      </div>
+      </proGood>
       <div class="hot">
         <div class="head">
           <list-title :title="'热门推荐'"></list-title>
@@ -59,21 +45,18 @@
          <hot :arr="recommends"></hot>
         </div>
       </div>
-      <div class="bottom-tip" v-show="bottomTipJudge">
-        <span class="loading-hook">{{bottomTip}}</span>
-      </div>
     </div>
-  </div>
+  </scroll>
 </template>
 
 <script>
-  import scroll from '../common/scroll.vue'
-  import slider from '../common/slider.vue'
-  import slide from '../common/slide.vue'
   import listTitle from '../common/listTitle.vue'
   import hot from '../common/hot.vue'
+  import scroll from '../common/scroll.vue'
+  import proGood from '../common/proGood.vue'
+  import {bus} from '../../common/js/bus'
   import {banner,hotProduct,selectProduct} from '../../api/api'
-  import {_initScroll,initScroll} from '../../common/js/fun'
+  import {initScroll,initAxios,swiperConfig,excision,axiosScroll} from '../../common/js/fun'
 export default {
   name: 'home',
   data () {
@@ -84,7 +67,6 @@ export default {
       bottomTipJudge:false,
       refreshAlert:false,
       page :1,
-
       routerparams:{
         tabId:0,
       },
@@ -92,7 +74,6 @@ export default {
       goodProList:[],
       banner:[{}],
       recommends:[],  //热门 产品
-    //  list:[],
       tab:[
         {id:1, route:'/type', params:{},name:'借款新口子'},
         {id:2, route:'/type', params:{state:1},name:'身份大额度'},
@@ -108,55 +89,38 @@ export default {
     }
   },
   created(){
-   this._initBanner();
- //  this._initSelectProduct();   //产品精选
-    this.$nextTick(() =>{
-      initScroll(this,hotProduct,this.$refs.continue,{page:this.page,isLine:1});
+    initAxios(banner,{state:1},(res) =>{  //banner 轮播图
+      this.banner = res.list;
     });
+    initAxios(selectProduct,{isLine:1},(res) =>{ //产品精选
+        this.goodProList = excision(res.list,4);
+    });
+    this.par = {page:this.page,isLine:1};
+    axiosScroll(this,hotProduct,this.par);
   this.$router.typeId = 1;//区分 同城 和 线上
   this.$router.isLine = 1;//区分 同城 和 线上
   },
   methods:{
-    _initBanner(){  //轮播图
-      banner().then((res) =>{
-        if (res.data.retcode == 1000){
-          this.banner = res.data.data.list;
-            console.log(this.slider);
-            this.$refs.isSliderX.launch();
-        }else {
-          alert(res.data.retmsg)
-        }
-      });
+    touchtop(){
+      this.limitData();
+      bus.$emit('refresh-data');
     },
-    _initSelectProduct(){
-      selectProduct().then((res) =>{
-        if(res.data.retcode == 1000){
-          console.log(this.goodProList);
-          if ( res.data.data.list.length != 0){
-            this.goodSliderTab =  res.data.data.list.length / 4;
-            if ( res.data.data.list.length % 4 > 0){
-              this.goodSliderTab += 1;
-            }
-             for (let i = 0; i < this.goodSliderTab; i++ ){
-               this.goodProList[i] = res.data.data.list.slice(i,i+4);
-             }
-              this.$refs.isSliderGoodX.launch();
-             console.log(this.goodProList)
-          }
-        }
-      })
+    touchbottom(){
+      if (!this.noParData){
+        this.par.page++;
+        axiosScroll(this,hotProduct,this.par)
+      }else {
+        bus.$emit('no-data',true)
+      }
+    },
+    limitData(){
+      this.noParData = false;
+      this.par.page = 1;
+      this.recommends = [];
+      axiosScroll(this,hotProduct,this.par)
     }
   },
-  beforeRouteEnter(to,from,next){
-    next(vm =>{
-      if (from.name){
-        console.log('喝喝');
-        vm.$refs.isSliderX.isNext = false;
-        vm.$refs.isSliderX._newInit();
-      }
-    })
-  },
-  components:{scroll,slider,listTitle,hot,slide}
+  components:{listTitle,hot,proGood,scroll}
 }
 </script>
 
@@ -166,10 +130,12 @@ export default {
 .continue
   position absolute
   left 0
-  top 0
+  top -60px
   right 0
   bottom 0
   overflow hidden
+  .bannerSlider
+    height 320px
   .banner
     width 100%
     height 320px
@@ -232,36 +198,6 @@ export default {
           i
             $bg-image('./img/ic-home-mxjq')
 
-  /*借贷精选*/
-  .proGood
-    margin 30px 0
-    background-color #ffffff
-    .head
-      padding-left 40px
-    .proGood_list
-      height 224px
-      background-color red
-      .goodSlider
-        width 100%
-        box-sizing border-box
-        padding 30px
-        ul
-          display flex
-          justify-content space-between
-          li
-            width 153px
-            height 152px
-            background-color yellow
-            a
-              display block
-              width 100%
-              height 100%
-              margin 0 auto
-              text-align center
-              img
-                width 80px
-                height 80px
-                margin 16px 0
 
   .hot
     background-color #ffffff
@@ -277,4 +213,34 @@ export default {
     transform translate(-50%)
   .refreshAlert
     top 0
+  #banner-pagination,#proGood-pagination
+    position: absolute
+    z-index 9
+    text-align center
+    span
+      width 30px
+      height 6px
+      border-radius 6px
+      background-color #ffffff
+
+</style>
+<style>
+  .mint-swipe-indicators>.mint-swipe-indicator{
+    width :30px;
+    height: 6px;
+    border-radius: 6px;
+    background: rgba(255,255,255,.2);
+  }
+  .mint-swipe-indicators>.is-active{
+    opacity: 1;
+    background: rgb(255,255,255);
+  }
+  .proGoodContainer .mint-swipe-indicators>.mint-swipe-indicator{
+    background: rgb(55,137,229);
+  }
+  .proGoodContainer .mint-swipe-indicators>.is-active{
+    opacity: 1;
+    background: rgb(55,137,229);
+  }
+
 </style>

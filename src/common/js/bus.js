@@ -3,7 +3,9 @@ export const bus = new Vue({
    data:{
      name:"bus",
      status:0,
+     city:'台州市',
      accountMap:{},
+     addressComponent:{},
      myCommonData:{}   //是否登录 是否认证
    },
   methods:{

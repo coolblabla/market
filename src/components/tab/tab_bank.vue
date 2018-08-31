@@ -17,6 +17,7 @@
   import {MoreProduct} from '../../api/cityApi'
   import {initScroll} from '../../common/js/fun'
   import {proList} from  '../../common/js/fun'
+  import noPro from '../common/noPro.vue'
   export default {
     data(){
       return {
@@ -31,7 +32,7 @@
     mounted(){
       initScroll(this,MoreProduct,this.$refs.proWrap,{page:this.page,isLine:this.$router.typeId,typeId:this.$route.params.id});
     },
-    components:{loanList}
+    components:{loanList,noPro}
   }
 </script>
 <style scoped lang="stylus">

@@ -76,9 +76,35 @@ export function _initScroll(vm,req) {
     }
   })
 };
+export function initAxios(req,params,callback){
+  req(params).then((res) =>{
+    if (res.data.retcode == 1000){
+      callback(res.data.data);
+    }else {
+      alert(res.data.retmsg);
+    }
+  });
+}
 
+export function resettingCity(vm,req,par) {
+  return req(par).then((res) =>{
+    console.log(res);
+    if (res.data.retcode == baseConfig.responseCode){
+      if (res.data.data.list.length != 0){
+        vm.recommends = vm.recommends.concat(res.data.data.list);
+        vm.recommends.length < params.limit ?  vm.bottomTipJudge = false : vm.bottomTipJudge = true;
+      }else {
+        vm.recommends = [];
+        vm.bottomTip = '无更多产品'
+      }
+    }else {
+      alert(res.data.retmsg);
+    }
+  })
+}
 
 export function responseScroll(vm,req,par){
+  console.log(par);
   return req(par).then((res) =>{
     console.log(res);
     if (res.data.retcode == baseConfig.responseCode){
@@ -160,6 +186,81 @@ export function proList(vm,req,par){
 }
 
 
+export function swiperConfig(vm,params) {
+  vm[[params.dom]] = new Swiper (params.ref, {
+    loop: true,
+    autoplay:params.autoplay,
+    autoplayDisableOnInteraction:false,
+    observer: true,
+    observeParents:true,
+    pagination:params.pagination
+  });
+}
+
+export function excision(list,index) {
+  if ( list.length != 0){
+    var len =  list.length / index;
+    if ( list.length % index > 0){
+      len += 1;
+    }
+    len = parseInt(len);
+    let start = 0, end = index,arr = [];
+    for (let i = 0; i < len; i++ ){
+      arr[i] = list.slice(start,end);
+      start = end;
+      end = end*2;
+    }
+    return arr;
+  }else {
+    alert('数据不能为空!')
+  }
+
+}
+export function setLocalStorage(key,value) {
+  if(typeof(Storage)!=="undefined"){
+    localStorage[key]=value;
+  } else{
+    alert("对不起您的浏览器不支持 web 存储");
+  }
+}
+
+
+export function getCity(vm) {
+  var g = new BMap.Geolocation();
+  g.getCurrentPosition(function (r) {
+    if (this.getStatus() == BMAP_STATUS_SUCCESS) {
+      let lat = r.point.lat;
+      let lng = r.point.lng;
+      console.log(r);
+      console.log(r.point);
+      let city = r.address.city;
+     return r.point;
+    }
+  })
+}
+
+export function axiosScroll(vm,req,par){
+  vm.noPro = false;
+  if (vm.$refs.scroll){
+    vm.$refs.scroll.bottomTipJudge = false;
+  }
+  initAxios(req,par,r =>{
+    vm.$nextTick(()=>{
+      if (vm.recommends.length == 0 && r.list.length == 0){
+        vm.$refs.scroll.bottomTipJudge = false;
+        vm.noPro = true;
+      }else {
+        vm.$refs.scroll.bottomTipJudge = true;
+        if (r.list.length < params.limit){  //没有更多数据了
+          vm.noParData = true;
+          vm.$refs.scroll.bottomTip = '无更多产品';
+        }
+        vm.recommends = vm.recommends.concat(r.list);
+      }
+      vm.$refs.scroll.scroll.refresh();
+    })
+  });
+}
 
 
 

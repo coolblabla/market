@@ -1,14 +1,14 @@
 <template>
   <div class="localWrap">
-    <search :place="'请输入城市名'" :backW="true">
+    <search :place="'请输入城市名'" :backW="true" :toggleInput="false" :citySearch="true">
       <i class="back" @click="goBack"></i>
     </search>
     <div class="currentCity">
       <h4>当前定位城市</h4>
     </div>
     <div class="locationCity">
-      <span>城市变量</span>
-      <button>重新定位</button>
+      <span>{{someCity.name}}</span>
+      <button @click="refresh()">重新定位</button>
     </div>
     <div class="city">
       <div class="cityListWrap" ref="cityListWrap">
@@ -32,19 +32,38 @@
         </ul>
       </div>
     </div>
-
+    <!--<comfirm :attr="hintAttr" v-show="hintAttr.show">-->
+        <!--<button @click="skip">确定</button>-->
+        <!--<button @click="close">取消</button>-->
+    <!--</comfirm>-->
   </div>
 </template>
 <script type="text/ecmascript-6">
   import search from '../common/search.vue'
   import BScroll from 'better-scroll'
+  import { Indicator } from 'mint-ui';
+  import { MessageBox } from 'mint-ui';
   import {cityList} from '../../api/cityApi'
+  import {bus} from '../../common/js/bus'
+ // import comfirm from '../common/comfirm.vue'
+  import {setLocalStorage} from '../../common/js/fun'
+  import {params,someCity} from '../../api/config'
+  import {baiduGetLocaltion}from '../../common/js/address'
   export default {
     data(){
       return {
         ChinaCity:[{}],
         listHeight:[],
-        scrollY:0
+        scrollY:0,
+        someCity,
+        hintAttr:{
+          show:false,
+          title:'提示',
+          content:'',
+          confirmText:'取消',
+          router: true,
+          to:"/"
+        }
       }
     },
     computed:{
@@ -61,9 +80,12 @@
       }
     },
     created(){
+      Indicator.open({text: '加载中...',
+        spinnerType: 'fading-circle'});
       cityList().then(res =>{
         console.log(res);
         if (res.data.retcode == 1000){
+          Indicator.close();
           this.ChinaCity = res.data.data;
           this.$nextTick(() =>{
             this._initScroll();
@@ -75,7 +97,45 @@
 
       })
     },
+    mounted(){
+      bus.$on('search-city',res =>{
+        if (res.name && res.name.length <= 15){
+          for (let i = 0, len = this.ChinaCity.length; i < len; i++){
+            for (let j = 0, jen = this.ChinaCity[i].sysCityList.length; j < jen; j++){
+              if (this.ChinaCity[i].sysCityList[j].name.indexOf(res.name) != -1){
+               // alert(this.ChinaCity[i].sysCityList[j].name)
+
+                this.selectLetter(this.ChinaCity[i].first,null,i);
+
+              //  console.log(this.ChinaCity[i].sysCityList[j].name)
+                 break;
+              }
+            }
+          }
+        }
+
+      })
+    },
     methods:{
+      skip(){
+        this.hintAttr.show = false;
+      //  setLocalStorage('address',JSON.stringify({city:this.cityName,adcode:this.cityCode}));
+       // someCity.name
+        //params.adminCode = this.cityCode;
+        bus.$emit('address',someCity.name);
+        bus.$emit('refreshcity',someCity.adcode);
+        this.$router.push({name:'city',params:{noActive:true}});
+      },
+      close(){
+        this.hintAttr.show = false;
+      },
+      refresh(){  //重新定位
+        baiduGetLocaltion();
+        bus.$emit('refreshcity',someCity.adcode);
+        bus.$on('address',(name)=>{
+          this.city = name;
+        })
+      },
       goBack() {
         window.history.length > 1?  history.go(-1) : this.$router.push('/')
       },
@@ -106,7 +166,26 @@
         }
       },
       selectCity(name,e,code){
-        alert(code)
+        MessageBox({
+          title: '提示',
+          message: '确定切换到'+name+'?',
+          showCancelButton: true
+        }).then((r) =>{
+          if (r == 'cancel'){
+            return;
+          }else {
+            someCity.name = name;
+            someCity.adcode = code;
+//            this.cityName = name;
+//            this.cityCode = code;
+            this.skip();
+          }
+        });
+//        this.hintAttr.show = true;
+//        someCity.name = name;
+//        someCity.adcode = code;
+//        this.hintAttr.content = '确定切换到';
+//        this.hintAttr.content = this.hintAttr.content+name;
       },
       _followScroll(index){
         let letterList = this.$refs.letterList;
@@ -114,8 +193,12 @@
         this.letterScroll.scrollToElement(el, 300, 0, -100);
       },
       selectLetter(letter,e,index){
-        if (!event._constructed) {
-          return;
+        try {
+          if (!event._constructed) {
+            return;
+          }
+        }catch(e) {
+
         }
         let cityList = this.$refs.cityList;
         let el = cityList[index];

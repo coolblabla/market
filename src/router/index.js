@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import home from '@/components/home/home'
 import type from '@/components/loanType/loanType'
 import proApply from '@/components/proApply/proApply'
+import fastApply from  '@/components/common/fastApply'
 
 import all from '@/components/proAll/proAll'
 import tabAll from '@/components/tab/tab_all'
@@ -14,6 +15,7 @@ import tabRate from '@/components/tab/tab_rate'
 import tabSbd from '@/components/tab/tab_sbd'
 import tabCredit from '@/components/tab/tab_credit'
 import tabZmf from '@/components/tab/tab_zmf'
+
 
 
 Vue.use(Router);
@@ -28,16 +30,23 @@ export default new Router({
     {
       path: '/type',
       name: 'type',
-      component: type
+      component: type,
     },{
       path: '/apply',
       name: 'applyPage',
-      component: proApply
+      component: proApply,
+    },
+    {
+      path :'/fastApply',
+      name:'fastApply',
+      component:fastApply,
+      meta: { requiresAuth: true }
     },
     {
       path: '/all',
       name: 'all',
       component: all,
+    //  meta: { requiresAuth: true },
       children:[
         {path:'tab/:tabId',name:'tab0',component:tabAll}, //全部
         {path:'tab/:tabId',name:'tab1',component:tabPhone},  //手机

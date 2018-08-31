@@ -1,0 +1,29 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
+<!--
+2013-9-30: Created.
+-->
+<svg>
+<metadata>
+Created by iconfont
+</metadata>
+<defs>
+
+<font id="iconfont" horiz-adv-x="1024" >
+  <font-face
+    font-family="iconfont"
+    font-weight="500"
+    font-stretch="normal"
+    units-per-em="1024"
+    ascent="896"
+    descent="-128"
+  />
+    <missing-glyph />
+    
+    <glyph glyph-name="moreunfold" unicode="&#59046;" d="M478.31207 251.840919C502.692194 224.938714 542.819471 225.301807 566.819471 252.730379L837.388303 561.951902C845.146852 570.818816 844.248346 584.296418 835.381431 592.05497 826.514517 599.813519 813.036915 598.915012 805.278364 590.048098L534.709532 280.826577C527.507586 272.59578 517.168621 272.502227 509.927514 280.492414L229.141056 590.325747C221.229163 599.056111 207.737949 599.719614 199.007586 591.807723 190.277222 583.895829 189.61372 570.404617 197.525612 561.674253L478.31207 251.840919Z"  horiz-adv-x="1024" />
+
+    
+
+
+  </font>
+</defs></svg>

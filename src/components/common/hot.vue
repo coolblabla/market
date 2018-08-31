@@ -1,7 +1,7 @@
 <template>
   <ul class="hotWrap">
     <li v-for="(item,index) in arr" :key="index">
-        <router-link :to="{name:'applyPage'}">
+        <router-link :to="{name:'applyPage',params:{name:item.proName,id:item.proId}}">
        <i class="icon"><img :src="item.proIcon" /></i>
         <div class="detail">
           <h1>{{item.proName}}</h1>
@@ -77,14 +77,16 @@
           .material
             display flex
             align-items center
-            li
-              display inline-block
-              height 26px
-              line-height 26px
-              padding 10px
-              font-size $font-size-20
-              margin-left 14px
-              border-radius 10px
-              border 2px solid rgb(55,137,229)
+            ul
+              display flex
+              li
+                display flex
+                align-items center
+                height 50px
+                padding 0 10px
+                font-size $font-size-20
+                margin-left 14px
+                border-radius 10px
+                border 2px solid rgb(55,137,229)
 
 </style>

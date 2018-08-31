@@ -87,3 +87,14 @@ export function judge(vm,check) {
     return true
   }
 }
+export function isIos() {
+  var u = navigator.userAgent;
+  return !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/)
+}
+
+
+
+export function isAndroid() {
+  var u = navigator.userAgent;
+  return u.indexOf("Android") > -1 || u.indexOf("Adr") > -1
+}

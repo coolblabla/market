@@ -22,7 +22,7 @@
             <p class="hint">利率(%)</p>
           </div>
           <div class="apply">
-            <router-link :to="{name:'applyPage',params:{name:item.name}}">申请</router-link>
+            <router-link :to="{name:'applyPage',params:{name:item.proName,id:item.proId}}">申请</router-link>
           </div>
         </div>
       </div>

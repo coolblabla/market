@@ -3,33 +3,12 @@ import qs from 'qs'
 import {options,params} from "./config"
 //import {getCookie} from '../common/js/fun'
 
-
-
-
-
-
-
-
+/*        线上的           */
 //轮播 banner
-
-export function banner() {
-  const data = {
-      limit:1,
-      page:1
-    },
-    url = options.proUrl+'/portal/portalSys/dcAdvertising';
-  return axios.get(url,qs.stringify(data)).then((res) => {
-    return  Promise.resolve(res)
-  })
-}
-
-
-
-//城市列表
-export function cityList() {
-     const url = 'http://10.10.100.11:7878/';
-    // const url = options.locationUrl+':7878/';
-  return axios.get(url).then((res) => {
+export function banner(par) {
+  const data = Object.assign({},par,{ page:1,limit:params.limit }),
+    url = options.url+'/portal/portalSys/dcAdvertising';
+  return axios.get(url,{params:data}).then((res) => {
     return  Promise.resolve(res)
   })
 }
@@ -117,6 +96,24 @@ export function hotProduct(par) {
   const url = options.url+'/portal/portalProduct/hotProduct';
   const data = Object.assign({},par,{merchantcode:params.merchantcode,limit:params.limit});
   return axios.get(url,{params:data}).then((res) => {
+    return  Promise.resolve(res)
+  })
+}
+
+
+//申请详情
+export function proDetail(par) {
+  const url = options.url+'/portal/portalProduct/detail';
+  const data = Object.assign({},par,{merchantcode:params.merchantcode});
+  return axios.get(url,{params:data}).then((res) => {
+    return  Promise.resolve(res)
+  })
+}
+
+export function applayInfo(par) {
+  const url = options.url+'/portal/apply/createApplyInfo';
+  const data = Object.assign({},par,{merchantCode:params.merchantcode});
+  return axios.post(url,qs.stringify(data)).then((res) => {
     return  Promise.resolve(res)
   })
 }

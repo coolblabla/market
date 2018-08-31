@@ -1,96 +1,105 @@
 <template>
-  <div ref="wrapper">
-    <slot></slot>
-  </div>
+    <div class="scroll" ref="scroll">
+      <div>
+        <div class="top-tip">
+          <span class="refresh-hook">{{topTip}}</span>
+        </div>
+        <div class="refreshAlert" v-show="refreshAlert"><p>刷新成功!</p></div>
+        <slot></slot>
+        <div class="bottom-tip" v-show="bottomTipJudge">
+          <span class="loading-hook">{{bottomTip}}</span>
+        </div>
+      </div>
+    </div>
 </template>
-
-<script>
-  import BScroll from 'better-scroll'
-
+<script type="text/ecmascript-6">
+  import Scroll from 'better-scroll'
+  import {bus} from '../../common/js/bus'
   export default {
-    props: {
-      probeType: {
-        type: Number,
-        default: 1 // 滚动派发scroll事件,会截流(?)
-      },
-      click: {
-        type: Boolean,
-        default: true
-      },
-      data: {
-        type: Array,
-        default: null
-      },
-      // 是否让scroll监听滚动事件 --> 减少消耗
-      listenScroll: {
-        type: Boolean,
-        default: false
-      },
-      // 下拉刷新的flag
-      pullup: {
-        type: Boolean,
-        default: false
-      },
-      beforeScroll: {
-        type: Boolean,
-        default: false
+    data(){
+      return {
+        topTip:'下拉刷新',
+        bottomTip:'查看更多',
+        bottomTipJudge:false,
+        refreshAlert:false,
+        page:1,
       }
     },
-    mounted() {
-      this.$nextTick(() => {
-        this._initScroll();
-      })
+    mounted(){
+      console.log(this.$parent)
+      console.log(this.$parent.$el)
+      this.initScroll();
+      bus.$on('no-data',r=>{
+        this.bottomTip = '无更多产品'
+      });
+      bus.$on('refresh-data',r=>{
+        this.bottomTip = '查看更多'
+      });
     },
-    methods: {
-      _initScroll() {
-        if (!this.$refs.wrapper) {
-          return
-        }
-        this.scroll = new BScroll(this.$refs.wrapper, {
-          probeType: this.probeType,
-          click: this.click
+    methods:{
+      refresh(){
+        this.scroll.refresh();
+      },
+      initScroll(){
+        const that = this;
+        this.scroll = new Scroll(this.$parent.$el, {
+          probeType: 1,
+          click:true
         });
-        if (this.listenScroll) {
-          let me = this // 保留vue实例
-          this.scroll.on('scroll', (pos) => {
-            // 派发scroll事件
-            me.$emit('scroll', pos) // 此处若用this,则会指向scroll
-          })
-        }
-        if (this.pullup) {
-          this.scroll.on('scrollEnd', () => {
-            if (this.scroll.y <= (this.scroll.maxScrollY + 50)) {
-              this.$emit('scrollToEnd')
-            }
-          })
-        }
-        if (this.beforeScroll) {
-          this.scroll.on('beforeScrollStart', () => {
-            this.$emit('beforeScroll')
-          })
-        }
-      },
+        // 滑动中
+        this.scroll.on('scroll',  (position) =>{
+          if(position.y > 25) {
+            this.topTip = '释放立即刷新';
+          }
+        });
+        this.scroll.on('touchEnd', function (position){
+          if (position.y > 25) {
+            that.disable();
+            let times = null;
+            times = setTimeout( ()=> {     //上啦刷新的时候
+              that.$emit('touchtop');
+              that.topTip = '下拉刷新';  // 恢复文本值
+              // 刷新成功后的提示
+              that.hint();
+              clearTimeout(times);
+              times = null;
+              that.enable();
+              that.scroll.refresh(); // 刷新列表后,重新计算滚动区域高度
+            }, 1000);
+          }else if(position.y < (this.maxScrollY - 25)) {   ////下拉 加载更多
+            that.bottomTip = '加载中...';
+            that.disable();
+            let times = null;
+            times = setTimeout( () =>{
+              that.$emit('touchbottom');
+              clearTimeout(times);
+              times = null;
+              that.enable();
+              that.scroll.refresh(); // 加载更多后,重新计算滚动区域高度
+            }, 1000);
+          }
 
-      enable() {
+        })
+      },
+      hint(){
+        this.refreshAlert =true;
+        let times = setTimeout(() =>{
+          this.refreshAlert = false;
+          clearTimeout(times);
+          times = null;
+        },2000)
+      },
+      disable(){
+        this.scroll && this.scroll.disable()
+      },
+      enable(){
         this.scroll && this.scroll.enable()
-      },
-      disable() {
-        this.scroll && this.scroll.enable()
-      },
-      refresh() {
-        this.scroll && this.scroll.refresh()
-      },
-      scrollTo() {
-        this.scroll && this.scroll.scrollTo.apply(this.scroll, arguments)
-      },
-      scrollToElement() {
-        this.scroll && this.scroll.scrollToElement.apply(this.scroll, arguments)
       }
     },
-    watch: {
-      data() {
-        this.refresh()
-      }
-    }
+  //  components:{orderList}
   }
 </script>
+<style scoped lang="stylus">
+  @import "../../common/stylus/variable.styl"
+  @import "../../common/stylus/proList.styl"
+</style>
